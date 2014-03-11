@@ -15,7 +15,7 @@ module Rulers
       Rulers.to_underscore klass
     end
 
-    def render(view_name, locals = {})
+    def new_render(view_name, locals = {})
       filename = File.join "app", "views",
       controller_name, "#{view_name}.html.erb"
       template = File.read filename
@@ -41,7 +41,7 @@ module Rulers
       @response
     end
 
-    def render_response(*args)
+    def render(*args)
       response(render(*args))
     end
 
