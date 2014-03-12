@@ -1,37 +1,35 @@
-# rulers/lib/rulers.rb
 require "rulers/version"
 require "rulers/routing"
 require "rulers/util"
 require "rulers/dependencies"
 require "rulers/controller"
+require "rulers/file_model"
 
 module Rulers
   class Application
-    def call(env)
+    def call(env) #Redefine
       if env['PATH_INFO'] == '/favicon.ico'
         return [404, {'Content-Type' => 'text/html'}, []]
-      elsif env['PATH_INFO'] == '/'
-        return [200, {'Content-Type' => 'text/html'}, ["index page"]]
       end
 
-      klass, act = get_controller_and_action(env)
-      controller = klass.new(env)
-      text = controller.send(act)
-      if controller.get_response
-        st, hd, rs = controller.get_response.to_a
-      else
-        [200, {'Content-Type' => 'text/html'}, [text]]
+      begin
+        klass, act = get_controller_and_action(env)
+        controller = klass.new(env)
+        text = controller.send(act)
+        if controller.get_response
+          st, hd, rs = controller.get_response.to_a
+          [st, hd, [rs.body].flatten]
+        else
+          [200, {'Content-Type' => 'text/html'}, [text]]
+        end
+      rescue Exception => e
+        error = e.inspect + "\n" + e.backtrace.join("\n")
+        [500, {'Content-Type' => 'text/text'}, [error]]
       end
+    end
   end
 
-  # class Controller
-  #   def initialize(env)
-  #     @env = env
-  #   end
-
-  #   def env
-  #     @env
-  #   end
-  # end
+  class Controller
+    include Rulers::Model
+  end
 end
-
